@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Super Math Adventure! 🧸✨</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+:root {
+  --blue:#4b8af5;
+  --blue-soft:#e3f0ff;
+  --green:#10c36e;
+  --green-soft:#d6ffe9;
+  --red:#ff4d6d;
+  --red-soft:#ffe3e8;
+  --yellow:#ffd93d;
+  --bg:#fefbf6;
+  --border:#e6e8ec;
+}
+
+/* BASE LAYOUT */
+body {
+  margin:0;
+  padding:20px;
+  font-family:"Comic Sans MS","Nunito","Poppins",sans-serif;
+  background:linear-gradient(135deg,#fff7d6,#fce8ff);
+  display:flex;
+  justify-content:center;
+  transition:background 0.4s ease;
+}
+
+/* streak backgrounds */
+body.streak1-bg {
+  background:linear-gradient(135deg,#dbeafe,#fee2e2);
+}
+body.streak2-bg {
+  background:linear-gradient(135deg,#f97316,#ef4444);
+}
+
+/* pacing visuals */
+body.relax-mode {
+  background:linear-gradient(135deg,#e0f2fe,#dcfce7);
+}
+body.focus-mode {
+  background:linear-gradient(135deg,#fed7aa,#fecaca);
+}
+
+body.relax-mode .app {
+  box-shadow:0 10px 35px rgba(15,118,110,0.25);
+}
+body.focus-mode .app {
+  box-shadow:0 12px 40px rgba(220,38,38,0.4);
+}
+
+body.relax-mode .player-bar {
+  background:#e0f9ff;
+  border-color:#bae6fd;
+}
+body.focus-mode .player-bar {
+  background:#fff1f2;
+  border-color:#fecaca;
+}
+
+/* SPLASH SCREEN */
+#splashScreen {
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at top,#ffeaa7,#f97316);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9997;
+  transition:opacity 0.4s ease;
+}
+.splash-box {
+  background:rgba(255,255,255,0.96);
+  border-radius:32px;
+  padding:32px 40px;
+  text-align:center;
+  box-shadow:0 18px 60px rgba(0,0,0,0.35);
+  max-width:420px;
+  width:80%;
+}
+.splash-icon {
+  font-size:64px;
+  margin-bottom:14px;
+  animation:splashBounce 1.2s ease-in-out infinite;
+}
+@keyframes splashBounce {
+  0%,100% { transform:translateY(0) scale(1); }
+  50%     { transform:translateY(-8px) scale(1.08); }
+}
+.splash-title {
+  font-size:26px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+.splash-sub {
+  font-size:14px;
+  color:#555;
+  margin-bottom:20px;
+}
+.splash-loader {
+  width:200px;
+  height:10px;
+  border-radius:999px;
+  background:#ffe9c2;
+  overflow:hidden;
+  margin:0 auto;
+  position:relative;
+}
+.splash-loader-bar {
+  position:absolute;
+  inset:0;
+  width:40%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#4b8af5,#10c36e);
+  animation:splashLoad 1.2s ease-in-out infinite;
+}
+@keyframes splashLoad {
+  0%   { transform:translateX(-100%); }
+  50%  { transform:translateX(20%); }
+  100% { transform:translateX(120%); }
+}
+
+/* APP SHELL */
+.app {
+  width:100%;
+  max-width:900px;
+  background:white;
+  border-radius:28px;
+  padding:26px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.12);
+  animation:popIn 0.4s ease-out;
+  opacity:0;
+  transition:opacity 0.4s ease, box-shadow 0.4s ease;
+}
+.app.ready {
+  opacity:1;
+}
+
+@keyframes popIn {
+  from { transform:scale(0.94) translateY(12px); opacity:0; }
+  to   { transform:scale(1) translateY(0); opacity:1; }
+}
+
+.title {
+  font-size:28px;
+  font-weight:900;
+  text-align:center;
+  margin-bottom:6px;
+  color:#333;
+}
+.subtitle {
+  text-align:center;
+  color:#555;
+  font-size:14px;
+  margin-bottom:12px;
+}
+
+/* PLAYER BAR */
+.player-bar {
+  background:#fff7e6;
+  border-radius:18px;
+  padding:10px 14px;
+  margin-bottom:14px;
+  border:1px solid #fde3b0;
+}
+.player-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:13px;
+  margin-bottom:6px;
+}
+.progress-bar {
+  width:100%;
+  height:10px;
+  border-radius:999px;
+  background:#f3f3f3;
+  overflow:hidden;
+}
+.progress-fill {
+  height:100%;
+  width:0;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#4b8af5,#10c36e);
+  transition:width 0.35s ease;
+}
+#comboText {
+  font-size:13px;
+  font-weight:700;
+  color:#444;
+}
+.comboFlash {
+  animation:comboFlashAnim 0.35s ease-out;
+}
+@keyframes comboFlashAnim {
+  0%   { color:#ffd93d; transform:scale(1.15); }
+  100% { color:#444; transform:scale(1); }
+}
+
+/* Pacing visuals in HUD */
+#pacingText {
+  font-weight:700;
+}
+body.relax-mode #pacingText {
+  color:#0f766e;
+}
+body.focus-mode #pacingText {
+  color:#b91c1c;
+}
+#pacingHint {
+  font-size:11px;
+  color:#555;
+  text-align:right;
+}
+
+/* BADGES */
+.badges-bar {
+  margin-top:6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.badge-chip {
+  border-radius:999px;
+  padding:4px 9px;
+  font-size:11px;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  border:1px solid #e5e7eb;
+}
+.badge-chip.locked {
+  opacity:0.35;
+}
+.badge-icon {
+  font-size:13px;
+}
+
+/* MODE BUTTONS */
+.mode-buttons {
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+.mode-btn {
+  padding:10px 22px;
+  border-radius:999px;
+  border:none;
+  background:#ffeaa7;
+  font-size:14px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all 0.15s ease;
+  box-shadow:0 4px 0 #e1c36b;
+}
+.mode-btn.small {
+  padding:8px 18px;
+  font-size:13px;
+}
+.mode-btn:hover { transform:translateY(-2px); }
+.mode-btn:active { transform:translateY(2px); box-shadow:none; }
+.mode-btn.active {
+  background:#4b8af5;
+  color:white;
+  box-shadow:0 4px 0 #2e64b9;
+}
+
+/* QUESTION CARDS */
+.question-card {
+  border:2px solid var(--border);
+  border-radius:18px;
+  background:#fff9f2;
+  padding:16px;
+  margin-bottom:14px;
+  animation:slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(15px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.question-text {
+  font-size:22px;
+  font-weight:900;
+  margin-bottom:12px;
+  color:#333;
+}
+.option {
+  background:white;
+  border:2px solid #dcdcdc;
+  padding:10px 12px;
+  border-radius:12px;
+  margin-bottom:8px;
+  cursor:pointer;
+  font-size:18px;
+  transition:all 0.15s ease;
+}
+.option:hover {
+  background:#eaf3ff;
+  transform:translateX(4px);
+}
+.option.correct {
+  background:var(--green-soft) !important;
+  border-color:var(--green) !important;
+  animation:correctPulse 0.25s ease-out;
+}
+@keyframes correctPulse {
+  0% { transform:scale(1); }
+  40% { transform:scale(1.06); }
+  100% { transform:scale(1); }
+}
+.option.incorrect {
+  background:var(--red-soft) !important;
+  border-color:var(--red) !important;
+  animation:shakeWrong 0.2s ease-out;
+}
+@keyframes shakeWrong {
+  0% { transform:translateX(0); }
+  25% { transform:translateX(-4px); }
+  50% { transform:translateX(4px); }
+  75% { transform:translateX(-3px); }
+  100% { transform:translateX(0); }
+}
+
+/* Disable options after answer */
+.option.disabled {
+  pointer-events:none;
+  opacity:0.65;
+}
+
+/* TEXT */
+.section-subtitle {
+  font-size:13px;
+  color:#666;
+  margin-bottom:6px;
+}
+.progress-wrap {
+  margin:6px 0 10px;
+}
+.progress-label {
+  font-size:12px;
+  color:#555;
+}
+
+/* MAXIM actions */
+.maxim-actions {
+  margin-top:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+/* MINI CHART */
+.mini-chart {
+  margin-top:6px;
+  display:flex;
+  align-items:flex-end;
+  gap:4px;
+  height:40px;
+}
+.mini-bar {
+  flex:1;
+  background:linear-gradient(180deg,#4b8af5,#a5b4fc);
+  border-radius:4px 4px 0 0;
+}
+
+/* WOW OVERLAY */
+#rewardOverlay {
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  cursor:pointer;
+}
+.reward-backdrop {
+  position:absolute;
+  inset:0;
+  backdrop-filter:blur(6px);
+  background:rgba(0,0,0,0.45);
+}
+.reward-box {
+  position:relative;
+  z-index:2;
+  background:white;
+  border-radius:28px;
+  padding:28px 32px;
+  text-align:center;
+  animation:bounceReward 0.5s cubic-bezier(.26,1.35,.59,1.13);
+  box-shadow:0 12px 40px rgba(0,0,0,0.35);
+}
+@keyframes bounceReward {
+  0% { transform:scale(0.7); opacity:0; }
+  60% { transform:scale(1.07); opacity:1; }
+  100% { transform:scale(1); }
+}
+.reward-icon {
+  font-size:50px;
+  margin-bottom:10px;
+  animation:floatIcon 2s ease-in-out infinite;
+}
+@keyframes floatIcon {
+  0%,100% { transform:translateY(0); }
+  50%     { transform:translateY(-6px); }
+}
+.confetti {
+  position:absolute;
+  width:10px;
+  height:14px;
+  border-radius:3px;
+  animation:confettiFall 1.4s linear forwards;
+}
+@keyframes confettiFall {
+  0% { transform:translateY(-20px) rotate(0deg); opacity:1; }
+  100% { transform:translateY(120px) rotate(240deg); opacity:0; }
+}
+
+/* SPAM COOLDOWN BANNER */
+#spamCooldownBanner {
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  background:rgba(0,0,0,0.8);
+  color:#fff;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:12px;
+  display:none;
+  align-items:center;
+  gap:6px;
+  z-index:9998;
+}
+#spamCooldownBanner span.icon {
+  font-size:14px;
+}
+
+/* SLOT MACHINE OVERLAY */
+#slotOverlay {
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9998;
+  cursor:pointer;
+}
+.slot-backdrop {
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(6px);
+}
+.slot-box {
+  position:relative;
+  z-index:2;
+  background:linear-gradient(145deg,#111827,#1f2937);
+  color:#f9fafb;
+  border-radius:24px;
+  padding:20px 26px;
+  width:320px;
+  text-align:center;
+  box-shadow:0 14px 50px rgba(0,0,0,0.7);
+  border:2px solid #fbbf24;
+}
+.slot-title {
+  font-size:20px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+.slot-sub {
+  font-size:12px;
+  color:#e5e7eb;
+  margin-bottom:16px;
+}
+.slot-reels {
+  display:flex;
+  justify-content:center;
+  gap:8px;
+  margin-bottom:12px;
+}
+.slot-reel {
+  background:#020617;
+  border-radius:12px;
+  padding:8px 12px;
+  border:2px solid #facc15;
+  min-width:70px;
+  min-height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 12px rgba(250,204,21,0.5);
+}
+.slot-symbol {
+  font-size:32px;
+  animation:slotIdle 1.1s ease-in-out infinite;
+}
+@keyframes slotIdle {
+  0%,100% { transform:translateY(0); }
+  50%     { transform:translateY(-3px); }
+}
+.slot-spinning .slot-symbol {
+  animation:slotSpin 0.18s linear infinite;
+}
+@keyframes slotSpin {
+  0%   { transform:translateY(0) scale(1); }
+  50%  { transform:translateY(-6px) scale(1.05); }
+  100% { transform:translateY(0) scale(1); }
+}
+.slot-result {
+  font-size:13px;
+  margin-top:4px;
+}
+.slot-hint {
+  margin-top:8px;
+  font-size:11px;
+  color:#d1d5db;
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splashScreen">
+  <div class="splash-box">
+    <div class="splash-icon">🧮</div>
+    <div class="splash-title">Super Math Adventure</div>
+    <div class="splash-sub">Loading your training arena…</div>
+    <div class="splash-loader">
+      <div class="splash-loader-bar"></div>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+  <div class="title">🧸 Super Math Adventure!</div>
+  <div class="subtitle">Questions level up with you, and chill a bit when you struggle. ✨</div>
+
+  <!-- PLAYER BAR -->
+  <div class="player-bar">
+    <div class="player-row">
+      <span id="levelText">⭐ Level 1</span>
+      <span id="xpLabel">0 / 100 XP</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="xpFill"></div>
+    </div>
+    <div class="player-row">
+      <span id="streakText">🔥 Streak: 0</span>
+      <span id="bestStreakText">🏅 Best: 0</span>
+    </div>
+    <div class="player-row">
+      <span id="comboText">✨ Combo: x1.0</span>
+    </div>
+    <div class="player-row">
+      <span id="pacingText">Pacing: Normal Rhythm 🎵</span>
+      <span id="pacingHint"></span>
+    </div>
+    <div class="badges-bar" id="badgesBar"></div>
+  </div>
+
+  <!-- MODE BUTTONS -->
+  <div class="mode-buttons">
+    <button class="mode-btn active" data-mode="practice">Practice 🐤</button>
+    <button class="mode-btn" data-mode="maxim">MAXIM ⚡</button>
+  </div>
+
+  <!-- PRACTICE SECTION -->
+  <div id="practiceSection">
+    <div class="section-subtitle">3 questions per batch · Auto-next in 2s</div>
+
+    <div class="progress-wrap">
+      <div class="progress-label" id="practiceProgressLabel">Progress: 0 / 20</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="practiceProgressFill"></div>
+      </div>
+    </div>
+
+    <div id="practiceQuizContainer"></div>
+
+    <div style="margin-top:8px;">
+      <button id="newPracticeSetBtn" class="mode-btn">Restart Practice ♻️</button>
+    </div>
+    <div id="practiceResultBox"></div>
+  </div>
+
+  <!-- MAXIM SECTION -->
+  <div id="maximSection" style="display:none;">
+    <div class="section-subtitle">20 rapid-fire questions · Auto-next in 1s</div>
+
+    <div class="progress-wrap">
+      <div class="progress-label" id="maximProgressLabel">MAXIM Progress: 0 / 20</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="maximProgressFill"></div>
+      </div>
+    </div>
+
+    <div class="progress-label" id="maximStatsLabel">Runs: 0 · Best: - · Best avg: -</div>
+    <div class="progress-label" id="maximDailyLabel">Today: 0 runs · Day streak: 0</div>
+    <div id="maximMiniChart" class="mini-chart"></div>
+
+    <div id="maximStatus"></div>
+    <div id="maximQuizContainer"></div>
+    <div id="maximResultBox"></div>
+  </div>
+
+  <!-- MEGA MODE SECTION -->
+  <div id="megaSection" style="display:none;">
+    <div class="section-subtitle">💥 MEGA MODE: 60s Blitz · Answer as many as you can!</div>
+    <div class="progress-wrap">
+      <div class="progress-label" id="megaTimerLabel">Time: 60s</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="megaTimeFill" style="background:linear-gradient(90deg,#22c55e,#ef4444);"></div>
+      </div>
+    </div>
+    <div id="megaQuizContainer"></div>
+    <div id="megaResultBox"></div>
+  </div>
+
+</div>
+
+<!-- WOW OVERLAY -->
+<div id="rewardOverlay">
+  <div class="reward-backdrop"></div>
+  <div class="reward-box">
+    <div class="reward-icon" id="rewardIcon">🎉</div>
+    <div class="reward-title" id="rewardTitle">Great Job!</div>
+    <div class="reward-text" id="rewardText">You finished the round!</div>
+  </div>
+</div>
+
+<!-- SLOT MACHINE OVERLAY -->
+<div id="slotOverlay">
+  <div class="slot-backdrop"></div>
+  <div class="slot-box">
+    <div class="slot-title">Lucky Spin 🎰</div>
+    <div class="slot-sub">Bonus rewards for your hard work!</div>
+    <div class="slot-reels">
+      <div class="slot-reel slot-spinning"><div class="slot-symbol">⭐</div></div>
+      <div class="slot-reel slot-spinning"><div class="slot-symbol">⭐</div></div>
+      <div class="slot-reel slot-spinning"><div class="slot-symbol">⭐</div></div>
+    </div>
+    <div class="slot-result" id="slotResultText">Spinning…</div>
+    <div class="slot-hint" id="slotCloseHint">Please wait…</div>
+  </div>
+</div>
+
+<!-- SPAM COOLDOWN BANNER -->
+<div id="spamCooldownBanner">
+  <span class="icon">⏳</span>
+  <span>Cooldown: <span id="spamCooldownSeconds">0</span>s</span>
+</div>
+
+<script>
+/* =================== STORAGE KEYS =================== */
+const XP_KEY="mathXP";
+const BEST_KEY="mathBestStreak";
+const TOTAL_CORRECT_KEY="mathTotalCorrect";
+const BADGES_KEY="mathBadges";
+const MEGA_RUNS_KEY="mathMegaRuns";
+const DIFF_SHIFT_KEY="mathDiffShift";
+
+const MAXIM_RUNS_KEY="mathMaximRuns";
+const MAXIM_BEST_CORRECT_KEY="mathMaximBestCorrect";
+const MAXIM_BEST_PERCENT_KEY="mathMaximBestPercent";
+const MAXIM_BEST_AVG_KEY="mathMaximBestAvg";
+
+const MAXIM_DAILY_KEY="mathMaximDaily";
+const MAXIM_DAY_STREAK_KEY="mathMaximDayStreak";
+const MAXIM_LAST_DATE_KEY="mathMaximLastDate";
+const MAXIM_RECENT_KEY="mathMaximRecent";
+
+/* =================== BADGE DEFINITIONS =================== */
+const BADGE_DEFS = [
+  {key:"firstCorrect", label:"First Step", desc:"Got your first correct answer", icon:"👣"},
+  {key:"streak5",     label:"On Fire",    desc:"5 correct in a row", icon:"🔥"},
+  {key:"streak10",    label:"Unstoppable",desc:"10 correct in a row", icon:"💥"},
+  {key:"maximClear",  label:"MAXIM Hero", desc:"Completed one MAXIM run", icon:"⚡"},
+  {key:"maximPerfect",label:"MAXIM Perfect", desc:"Got all answers correct in MAXIM", icon:"🌟"},
+  {key:"megaMode",    label:"Blitz Runner", desc:"Played MEGA MODE", icon:"⏱️"},
+  {key:"mega3",       label:"Triple Blitz", desc:"Played MEGA MODE 3 times", icon:"⚡3"},
+  {key:"total100",    label:"Century Brain", desc:"Reached 100 total correct answers", icon:"💯"}
+];
+
+/* =================== PLAYER STATE =================== */
+let xp = parseInt(localStorage.getItem(XP_KEY) || "0", 10);
+if (isNaN(xp)) xp = 0;
+let bestStreak = parseInt(localStorage.getItem(BEST_KEY) || "0", 10);
+if (isNaN(bestStreak)) bestStreak = 0;
+let streak = 0;
+let wrongStreak = 0;
+
+let totalCorrectEver = parseInt(localStorage.getItem(TOTAL_CORRECT_KEY) || "0", 10);
+if (isNaN(totalCorrectEver)) totalCorrectEver = 0;
+
+let megaRuns = parseInt(localStorage.getItem(MEGA_RUNS_KEY) || "0", 10);
+if (isNaN(megaRuns)) megaRuns = 0;
+
+let difficultyShift = parseInt(localStorage.getItem(DIFF_SHIFT_KEY) || "0", 10);
+if (isNaN(difficultyShift)) difficultyShift = 0;
+
+let maximRuns = parseInt(localStorage.getItem(MAXIM_RUNS_KEY) || "0", 10);
+if (isNaN(maximRuns)) maximRuns = 0;
+let maximBestCorrect = parseInt(localStorage.getItem(MAXIM_BEST_CORRECT_KEY) || "0", 10);
+if (isNaN(maximBestCorrect)) maximBestCorrect = 0;
+let maximBestPercent = parseInt(localStorage.getItem(MAXIM_BEST_PERCENT_KEY) || "0", 10);
+if (isNaN(maximBestPercent)) maximBestPercent = 0;
+let maximBestAvg = parseFloat(localStorage.getItem(MAXIM_BEST_AVG_KEY) || "0");
+if (isNaN(maximBestAvg)) maximBestAvg = 0;
+
+let maximDayStreak = parseInt(localStorage.getItem(MAXIM_DAY_STREAK_KEY) || "0", 10);
+if (isNaN(maximDayStreak)) maximDayStreak = 0;
+let maximLastDate = localStorage.getItem(MAXIM_LAST_DATE_KEY) || "";
+
+let maximDaily = {};
+try { maximDaily = JSON.parse(localStorage.getItem(MAXIM_DAILY_KEY) || "{}"); }
+catch(e) { maximDaily = {}; }
+
+let maximRecent = [];
+try {
+  maximRecent = JSON.parse(localStorage.getItem(MAXIM_RECENT_KEY) || "[]");
+  if (!Array.isArray(maximRecent)) maximRecent = [];
+} catch(e) { maximRecent = []; }
+
+let badgesState = {};
+try { badgesState = JSON.parse(localStorage.getItem(BADGES_KEY) || "{}"); }
+catch(e) { badgesState = {}; }
+
+/* =================== ANTI-SPAM GLOBALS =================== */
+let lastClickTs = 0;
+const CLICK_COOLDOWN_MS = 200;
+
+const modeLock = {
+  practice: false,
+  maxim: false,
+  mega: false
+};
+
+let xpWindowStart = 0;
+let xpWindowTotal = 0;
+const XP_WINDOW_MS = 5000;
+const XP_WINDOW_CAP = 200;
+
+/* MEGA MODE cooldown */
+let megaCooldownUntil = 0;
+const MEGA_COOLDOWN_MS = 30000;
+
+/* GLOBAL SPAM DETECTION */
+let spamWindowStart = 0;
+let spamCount = 0;
+const SPAM_WINDOW_MS = 3000;
+const SPAM_THRESHOLD = 6;
+const SPAM_PENALTY_MS = 5000;
+let spamPenaltyUntil = 0;
+
+/* =================== SMART PACING STATE =================== */
+let relaxRoundActive = false;
+let relaxRoundRemaining = 0;
+let focusRoundActive = false;
+let focusRoundRemaining = 0;
+
+/* =================== SLOT MACHINE STATE =================== */
+const SLOT_ICONS = ["⭐","🍒","🍀","💎","🍎","🎈"];
+let slotSpinning = false;
+
+/* =================== REWARD OVERLAY CALLBACK =================== */
+let rewardCloseCallback = null;
+
+/* =================== HELPERS =================== */
+function saveState() {
+  localStorage.setItem(XP_KEY, String(xp));
+  localStorage.setItem(BEST_KEY, String(bestStreak));
+  localStorage.setItem(TOTAL_CORRECT_KEY, String(totalCorrectEver));
+  localStorage.setItem(BADGES_KEY, JSON.stringify(badgesState));
+  localStorage.setItem(MEGA_RUNS_KEY, String(megaRuns));
+  localStorage.setItem(DIFF_SHIFT_KEY, String(difficultyShift));
+
+  localStorage.setItem(MAXIM_RUNS_KEY, String(maximRuns));
+  localStorage.setItem(MAXIM_BEST_CORRECT_KEY, String(maximBestCorrect));
+  localStorage.setItem(MAXIM_BEST_PERCENT_KEY, String(maximBestPercent));
+  localStorage.setItem(MAXIM_BEST_AVG_KEY, String(maximBestAvg));
+
+  localStorage.setItem(MAXIM_DAY_STREAK_KEY, String(maximDayStreak));
+  localStorage.setItem(MAXIM_LAST_DATE_KEY, maximLastDate || "");
+  localStorage.setItem(MAXIM_DAILY_KEY, JSON.stringify(maximDaily));
+  localStorage.setItem(MAXIM_RECENT_KEY, JSON.stringify(maximRecent));
+}
+
+function levelFromXP(xpVal) {
+  return Math.floor(xpVal / 100) + 1;
+}
+
+function getTodayString() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+function parseDateStr(s) {
+  if (!s) return null;
+  const parts = s.split("-");
+  if (parts.length !== 3) return null;
+  const y = parseInt(parts[0],10);
+  const m = parseInt(parts[1],10);
+  const d = parseInt(parts[2],10);
+  if (isNaN(y)||isNaN(m)||isNaN(d)) return null;
+  return new Date(y, m-1, d);
+}
+
+function updateBackgroundByStreak() {
+  document.body.classList.remove("streak1-bg","streak2-bg");
+  if (streak >= 5) document.body.classList.add("streak2-bg");
+  else if (streak >= 3) document.body.classList.add("streak1-bg");
+}
+
+function updatePlayerUI() {
+  const lvl = levelFromXP(xp);
+  const into = xp % 100;
+  document.getElementById("levelText").textContent = `⭐ Level ${lvl}`;
+  document.getElementById("xpLabel").textContent = `${into} / 100 XP`;
+  document.getElementById("xpFill").style.width = `${into}%`;
+  document.getElementById("streakText").textContent = `🔥 Streak: ${streak}`;
+  document.getElementById("bestStreakText").textContent = `🏅 Best: ${bestStreak}`;
+  updateBackgroundByStreak();
+}
+
+/* Pacing HUD + body classes */
+function updatePacingUI(extraHint) {
+  const t = document.getElementById("pacingText");
+  const h = document.getElementById("pacingHint");
+
+  document.body.classList.remove("relax-mode","focus-mode");
+
+  let mood = "Normal Rhythm 🎵";
+  let hint = "";
+
+  if (relaxRoundActive) {
+    mood = "Relax Round 🌙";
+    hint = "Gentler questions for a bit.";
+    document.body.classList.add("relax-mode");
+  } else if (focusRoundActive) {
+    mood = "Focus Round ⚡";
+    hint = "Slightly tougher, better rewards.";
+    document.body.classList.add("focus-mode");
+  }
+
+  if (extraHint) hint = extraHint;
+
+  if (t) t.textContent = "Pacing: " + mood;
+  if (h) h.textContent = hint;
+}
+
+function renderBadgesUI() {
+  const bar = document.getElementById("badgesBar");
+  bar.innerHTML = "";
+  BADGE_DEFS.forEach(b => {
+    const unlocked = !!badgesState[b.key];
+    const chip = document.createElement("div");
+    chip.className = "badge-chip" + (unlocked ? "" : " locked");
+    chip.innerHTML = `<span class="badge-icon">${b.icon}</span><span>${b.label}</span>`;
+    chip.title = b.desc;
+    bar.appendChild(chip);
+  });
+}
+
+function awardBadge(key) {
+  if (badgesState[key]) return;
+  badgesState[key] = true;
+  saveState();
+  renderBadgesUI();
+  showReward("New Badge Unlocked!", BADGE_DEFS.find(b=>b.key===key)?.label || key, "🏅");
+}
+
+/* =================== SMART PACING CONTROL =================== */
+function triggerRelaxRound(questions, reason) {
+  relaxRoundActive = true;
+  relaxRoundRemaining = questions;
+  focusRoundActive = false;
+  focusRoundRemaining = 0;
+  updatePacingUI(reason || "Taking a breather with easier questions.");
+}
+
+function triggerFocusRound(questions, reason) {
+  focusRoundActive = true;
+  focusRoundRemaining = questions;
+  relaxRoundActive = false;
+  relaxRoundRemaining = 0;
+  updatePacingUI(reason || "Hot streak! Focus round activated.");
+}
+
+function onQuestionSpawned() {
+  if (relaxRoundActive) {
+    relaxRoundRemaining--;
+    if (relaxRoundRemaining <= 0) {
+      relaxRoundActive = false;
+      updatePacingUI();
+    } else {
+      updatePacingUI();
+    }
+  } else if (focusRoundActive) {
+    focusRoundRemaining--;
+    if (focusRoundRemaining <= 0) {
+      focusRoundActive = false;
+      updatePacingUI();
+    } else {
+      updatePacingUI();
+    }
+  } else {
+    updatePacingUI();
+  }
+}
+
+/* =================== COMBO & XP (throttled) =================== */
+function getComboMultiplier() {
+  if (streak >= 5) return 2.0;
+  if (streak >= 3) return 1.5;
+  return 1.0;
+}
+
+function addXP(base) {
+  const now = Date.now();
+  if (now - xpWindowStart > XP_WINDOW_MS) {
+    xpWindowStart = now;
+    xpWindowTotal = 0;
+  }
+
+  const combo = getComboMultiplier();
+  let gain = Math.round(base * combo);
+
+  if (focusRoundActive) {
+    gain = Math.round(gain * 1.2);
+  } else if (relaxRoundActive) {
+    gain = Math.round(gain * 0.8);
+  }
+
+  if (xpWindowTotal >= XP_WINDOW_CAP) gain = 0;
+  else if (xpWindowTotal + gain > XP_WINDOW_CAP) gain = XP_WINDOW_CAP - xpWindowTotal;
+
+  const ct = document.getElementById("comboText");
+  ct.textContent = `✨ Combo: x${combo.toFixed(1)}`;
+  ct.classList.add("comboFlash");
+  setTimeout(() => ct.classList.remove("comboFlash"), 300);
+
+  if (gain <= 0) return;
+
+  xpWindowTotal += gain;
+  xp += gain;
+
+  saveState();
+  updatePlayerUI();
+}
+
+/* =================== SOUND =================== */
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  return audioCtx;
+}
+function beep(freq, dur, type="sine", vol=0.3, delayMs=0) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const start = ctx.currentTime + delayMs / 1000;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.value = vol;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(start);
+  osc.stop(start + dur);
+}
+function playCorrectSound() {
+  beep(880, 0.1, "triangle", 0.25);
+  beep(1320, 0.1, "triangle", 0.22, 120);
+}
+function playWrongSound() {
+  beep(300, 0.15, "sawtooth", 0.3);
+}
+function playRewardSound() {
+  beep(660, 0.12, "sine", 0.25, 0);
+  beep(880, 0.12, "sine", 0.25, 120);
+  beep(1040, 0.15, "sine", 0.25, 260);
+}
+function playSlotTickSound() {
+  beep(500, 0.06, "square", 0.18);
+}
+function playSlotWinSound() {
+  beep(700, 0.12, "triangle", 0.25);
+  beep(900, 0.12, "triangle", 0.25, 120);
+  beep(1100, 0.12, "triangle", 0.25, 240);
+}
+
+/* =================== WOW OVERLAY (with callback) =================== */
+function showReward(title, text, icon="🎉", onCloseCallback=null) {
+  playRewardSound();
+  const o = document.getElementById("rewardOverlay");
+  document.getElementById("rewardTitle").textContent = title;
+  document.getElementById("rewardText").textContent = text;
+  document.getElementById("rewardIcon").textContent = icon;
+  rewardCloseCallback = typeof onCloseCallback === "function" ? onCloseCallback : null;
+  o.style.display = "flex";
+
+  for (let i=0;i<20;i++) {
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = (window.innerWidth/2 + (Math.random()*260 - 130)) + "px";
+    c.style.top = "40%";
+    const colors = ["#ff6b6b","#ffd93d","#6bcB77","#4dabf7","#b197fc"];
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.animationDelay = (Math.random()*0.3)+"s";
+    o.appendChild(c);
+    setTimeout(()=>c.remove(), 1500);
+  }
+}
+document.getElementById("rewardOverlay").addEventListener("click", () => {
+  const o = document.getElementById("rewardOverlay");
+  o.style.display = "none";
+  if (rewardCloseCallback) {
+    const cb = rewardCloseCallback;
+    rewardCloseCallback = null;
+    cb();
+  }
+});
+
+/* =================== SLOT MACHINE =================== */
+function showSlotMachine() {
+  const overlay = document.getElementById("slotOverlay");
+  const resultEl = document.getElementById("slotResultText");
+  const hintEl = document.getElementById("slotCloseHint");
+  const reels = Array.from(document.querySelectorAll(".slot-reel"));
+
+  if (!overlay || !resultEl || !hintEl || reels.length !== 3) return;
+  if (slotSpinning) return;
+
+  slotSpinning = true;
+  overlay.style.display = "flex";
+  resultEl.textContent = "Spinning…";
+  hintEl.textContent = "Please wait…";
+
+  reels.forEach(r => r.classList.add("slot-spinning"));
+
+  const symbols = reels.map(r => r.querySelector(".slot-symbol"));
+
+  let ticks = 0;
+  const maxTicks = 18 + Math.floor(Math.random()*6);
+
+  const interval = setInterval(() => {
+    ticks++;
+    playSlotTickSound();
+    symbols.forEach(el => {
+      const icon = SLOT_ICONS[Math.floor(Math.random()*SLOT_ICONS.length)];
+      el.textContent = icon;
+    });
+    if (ticks >= maxTicks) {
+      clearInterval(interval);
+      reels.forEach(r => r.classList.remove("slot-spinning"));
+      finalizeSlotResult(symbols, resultEl, hintEl, overlay);
+    }
+  }, 90);
+}
+
+function finalizeSlotResult(symbols, resultEl, hintEl, overlay) {
+  const vals = symbols.map(el => el.textContent);
+  const setSize = new Set(vals).size;
+  let msg = "";
+  let bonus = 0;
+
+  if (setSize === 1) {
+    msg = "JACKPOT! All three match! +30 XP 🎉";
+    bonus = 30;
+  } else if (
+    vals[0] === vals[1] ||
+    vals[1] === vals[2] ||
+    vals[0] === vals[2]
+  ) {
+    msg = "Nice match! You got +15 XP ✨";
+    bonus = 15;
+  } else {
+    msg = "No match this time, but here's +5 XP for trying 💫";
+    bonus = 5;
+  }
+
+  playSlotWinSound();
+  addXP(bonus);
+
+  resultEl.textContent = msg;
+  hintEl.textContent = "Tap anywhere to continue";
+  slotSpinning = false;
+
+  function closeOnce() {
+    overlay.style.display = "none";
+    overlay.removeEventListener("click", closeOnce);
+  }
+  overlay.addEventListener("click", closeOnce);
+}
+
+/* =================== ADAPTIVE DIFFICULTY + PACING =================== */
+function getEffectiveLevel() {
+  const base = levelFromXP(xp);
+  return Math.max(1, base + difficultyShift);
+}
+
+function getBaseRange(lvl) {
+  if (lvl <= 2) return {min:1, max:5};
+  if (lvl <= 4) return {min:1, max:9};
+  if (lvl <= 6) return {min:2, max:12};
+  if (lvl <= 8) return {min:3, max:15};
+  return {min:5, max:20};
+}
+
+function clampRange(min, max, globalMin, globalMax) {
+  return {
+    min: Math.max(globalMin, min),
+    max: Math.min(globalMax, max)
+  };
+}
+
+function getDifficultyRange() {
+  const lvl = getEffectiveLevel();
+  let base = getBaseRange(lvl);
+
+  if (relaxRoundActive) {
+    return {min:1, max:5};
+  }
+
+  if (focusRoundActive) {
+    const boosted = {min: base.min + 1, max: base.max + 3};
+    return clampRange(boosted.min, boosted.max, 1, 20);
+  }
+
+  return base;
+}
+
+/* =================== ANSWER HOOKS =================== */
+function onCorrectAnswer() {
+  streak++;
+  wrongStreak = 0;
+
+  totalCorrectEver++;
+  if (streak > bestStreak) bestStreak = streak;
+
+  if (totalCorrectEver === 1) awardBadge("firstCorrect");
+  if (streak === 5) {
+    awardBadge("streak5");
+    if (!focusRoundActive && !relaxRoundActive) {
+      triggerFocusRound(6, "Hot streak! 6 Focus questions up next.");
+    }
+  }
+  if (streak === 10) awardBadge("streak10");
+  if (totalCorrectEver >= 100) awardBadge("total100");
+
+  if (difficultyShift < 0 && streak >= 4) difficultyShift++;
+
+  playCorrectSound();
+  addXP(10);
+  saveState();
+  updatePlayerUI();
+  maybeUnlockMegaMode();
+}
+
+function onWrongAnswer() {
+  streak = 0;
+  wrongStreak++;
+
+  if (!relaxRoundActive && wrongStreak >= 3 && difficultyShift > -3) {
+    difficultyShift--;
+    wrongStreak = 0;
+    if (!relaxRoundActive) {
+      triggerRelaxRound(6, "You hit a rough patch. Chill 6 easier questions.");
+    }
+  }
+
+  playWrongSound();
+  addXP(2);
+  saveState();
+  updatePlayerUI();
+}
+
+/* =================== QUESTION GENERATOR =================== */
+function rand(n){ return Math.floor(Math.random()*n); }
+
+function genQ() {
+  const range = getDifficultyRange();
+  const span = range.max - range.min + 1;
+  const a = range.min + rand(span);
+  const b = range.min + rand(span);
+  const correct=a*b;
+
+  const near1 = correct + (rand(2) ? 1 : -1);
+  const near2 = correct + (rand(2) ? 2 : -2);
+  const randJump = correct + (5 + rand(6));
+
+  const raw=[correct, near1, near2, randJump];
+  const opts=Array.from(new Set(raw)).sort(()=>Math.random()-.5);
+
+  onQuestionSpawned();
+
+  return {txt:`${a} × ${b} = ?`, correct, opts};
+}
+
+/* =================== PRACTICE MODE =================== */
+const TOTAL=20, BATCH=3;
+let pQ=[], pIndex=0, pCorrect=0, pAnswered={}, pTotal=0;
+let pTimer=null;
+
+function clearPT(){ if(pTimer){ clearTimeout(pTimer); pTimer=null; } }
+
+function updatePracticeProgress(){
+  const pct=(pTotal/TOTAL)*100;
+  document.getElementById("practiceProgressLabel").textContent=`Progress: ${pTotal} / ${TOTAL}`;
+  document.getElementById("practiceProgressFill").style.width=`${pct}%`;
+}
+
+let currentMode="practice";
+
+function startPractice(){
+  clearPT();
+  currentMode="practice";
+  document.getElementById("practiceSection").style.display="block";
+  document.getElementById("maximSection").style.display="none";
+  document.getElementById("megaSection").style.display="none";
+
+  pQ = new Array(TOTAL);
+  pIndex=0; pCorrect=0; pAnswered={}; pTotal=0;
+  updatePracticeProgress();
+  document.getElementById("practiceResultBox").textContent="";
+  loadPracticeBatch();
+}
+
+function loadPracticeBatch(){
+  const box=document.getElementById("practiceQuizContainer");
+  box.innerHTML="";
+
+  if(pIndex>=TOTAL){
+    const score=Math.round((pCorrect/TOTAL)*100);
+    showReward("Practice Complete!",`You got ${pCorrect}/${TOTAL} (${score}%)!`,"🏆");
+    pTimer=setTimeout(startPractice,2200);
+    return;
+  }
+
+  for(let i=pIndex;i<Math.min(pIndex+BATCH,TOTAL);i++){
+    let q=pQ[i];
+    if (!q) {
+      q = genQ();
+      pQ[i] = q;
+    }
+    const card=document.createElement("div");
+    card.className="question-card";
+    let html=`<div class="question-text">${q.txt}</div>`;
+    q.opts.forEach(v=>{
+      html+=`<div class="option" data-mode="practice" data-index="${i}" data-v="${v}">${v}</div>`;
+    });
+    html+=`<div class="feedback"></div>`;
+    card.innerHTML=html;
+    box.appendChild(card);
+  }
+}
+
+function answerPractice(idx, chosen, optEl){
+  if (modeLock.practice) return;
+  modeLock.practice = true;
+
+  if(pAnswered[idx]) {
+    modeLock.practice = false;
+    return;
+  }
+  const q=pQ[idx];
+  pAnswered[idx]=true;
+  pTotal++;
+  updatePracticeProgress();
+
+  const card=optEl.closest(".question-card");
+  const fb=card.querySelector(".feedback");
+  const opts=card.querySelectorAll(".option");
+  opts.forEach(o=>o.classList.add("disabled"));
+
+  if(chosen===q.correct){
+    pCorrect++;
+    optEl.classList.add("correct");
+    fb.textContent="Correct!";
+    onCorrectAnswer();
+  } else {
+    optEl.classList.add("incorrect");
+    fb.textContent=`Correct: ${q.correct}`;
+    opts.forEach(o=>{ if(+o.dataset.v===q.correct) o.classList.add("correct"); });
+    onWrongAnswer();
+  }
+
+  const batch=[pIndex,pIndex+1,pIndex+2].filter(i=>i<TOTAL);
+  const done=batch.every(i=>pAnswered[i]);
+  if(done){
+    clearPT();
+    pTimer=setTimeout(()=>{
+      pIndex+=BATCH;
+      loadPracticeBatch();
+    },2000);
+  }
+
+  setTimeout(()=>{ modeLock.practice = false; }, 180);
+}
+
+/* =================== MAXIM MODE =================== */
+let mQ=[], mIdx=0, mCorrect=0, mAnswered=0, mStart=0, mTimer=null;
+let maximAnsweredCurrent=false;
+let maximCompleted=false;
+
+function clearMT(){ if(mTimer){ clearTimeout(mTimer); mTimer=null; } }
+
+function updateMaximProgress(){
+  const pct=(mAnswered/TOTAL)*100;
+  document.getElementById("maximProgressLabel").textContent=`MAXIM Progress: ${mAnswered} / ${TOTAL}`;
+  document.getElementById("maximProgressFill").style.width=`${pct}%`;
+}
+
+function updateMaximStatsUI(){
+  const label = document.getElementById("maximStatsLabel");
+  if (maximRuns === 0) {
+    label.textContent = "Runs: 0 · Best: - · Best avg: -";
+    return;
+  }
+  label.textContent =
+    `Runs: ${maximRuns} · Best: ${maximBestCorrect}/${TOTAL} (${maximBestPercent}%) · Best avg: ${maximBestAvg.toFixed(2)}s/Q`;
+}
+
+function updateMaximDailyUI(){
+  const label = document.getElementById("maximDailyLabel");
+  const today = getTodayString();
+  const d = maximDaily[today];
+  if (!d) {
+    label.textContent = `Today: 0 runs · Day streak: ${maximDayStreak}`;
+  } else {
+    label.textContent =
+      `Today: ${d.runs} run${d.runs!==1?"s":""} · Best today: ${d.bestCorrect}/${TOTAL} (${d.bestPercent}%) · Day streak: ${maximDayStreak}`;
+  }
+}
+
+function renderMaximMiniChart(){
+  const wrap = document.getElementById("maximMiniChart");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  if (!maximRecent.length) {
+    wrap.textContent = "No runs yet.";
+    return;
+  }
+  const last5 = maximRecent.slice(-5);
+  last5.forEach((run, idx) => {
+    const bar = document.createElement("div");
+    bar.className = "mini-bar";
+    const h = Math.max(5, Math.min(100, run.percent));
+    bar.style.height = h + "%";
+    bar.title = `Run ${maximRuns - last5.length + idx + 1}: ${run.correct}/${TOTAL} (${run.percent}%) · ${run.avg.toFixed(2)}s/Q`;
+    wrap.appendChild(bar);
+  });
+}
+
+function startMaxim(){
+  clearMT();
+  currentMode="maxim";
+  maximCompleted=false;
+
+  document.getElementById("practiceSection").style.display="none";
+  document.getElementById("maximSection").style.display="block";
+  document.getElementById("megaSection").style.display="none";
+
+  mQ = new Array(TOTAL);
+  mIdx=0; mCorrect=0; mAnswered=0;
+  mStart=performance.now();
+  updateMaximProgress();
+  updateMaximStatsUI();
+  updateMaximDailyUI();
+  renderMaximMiniChart();
+  document.getElementById("maximResultBox").innerHTML="";
+  renderMaximQuestion();
+}
+
+function renderMaximQuestion(){
+  const box=document.getElementById("maximQuizContainer");
+  const status=document.getElementById("maximStatus");
+  const result=document.getElementById("maximResultBox");
+  box.innerHTML="";
+  maximAnsweredCurrent=false;
+
+  if(mIdx>=TOTAL){
+    const time=(performance.now()-mStart)/1000;
+    const avg=time/TOTAL;
+    const percent=Math.round((mCorrect/TOTAL)*100);
+
+    maximRuns++;
+
+    if (
+      percent > maximBestPercent ||
+      (percent === maximBestPercent && (maximBestAvg === 0 || avg < maximBestAvg))
+    ) {
+      maximBestCorrect = mCorrect;
+      maximBestPercent = percent;
+      maximBestAvg = avg;
+    }
+
+    const today = getTodayString();
+    if (!maximDaily[today]) {
+      maximDaily[today] = {runs:0,bestCorrect:0,bestPercent:0,bestAvg:0};
+    }
+    const d = maximDaily[today];
+    d.runs += 1;
+    if (
+      percent > d.bestPercent ||
+      (percent === d.bestPercent && (d.bestAvg === 0 || avg < d.bestAvg))
+    ) {
+      d.bestCorrect = mCorrect;
+      d.bestPercent = percent;
+      d.bestAvg = avg;
+    }
+
+    const prev = parseDateStr(maximLastDate);
+    const now = parseDateStr(today);
+    if (!prev) {
+      maximDayStreak = 1;
+    } else {
+      const diffDays = Math.round((now - prev)/(1000*60*60*24));
+      if (diffDays === 0) {
+        // same day
+      } else if (diffDays === 1) {
+        maximDayStreak = (maximDayStreak || 0) + 1;
+      } else {
+        maximDayStreak = 1;
+      }
+    }
+    maximLastDate = today;
+
+    maximRecent.push({correct:mCorrect, percent, avg, ts:Date.now()});
+    if (maximRecent.length > 10) maximRecent.shift();
+
+    saveState();
+    updateMaximStatsUI();
+    updateMaximDailyUI();
+    renderMaximMiniChart();
+
+    status.textContent="MAXIM Complete!";
+    result.innerHTML=
+      `Score: ${mCorrect}/${TOTAL} (${percent}%) · ${avg.toFixed(2)}s/question` +
+      `<div class="maxim-actions">
+         <button class="mode-btn small" onclick="startMaxim()">Play MAXIM Again ⚡</button>
+         <button class="mode-btn small" onclick="startPractice()">Back to Practice 🐤</button>
+       </div>`;
+
+    awardBadge("maximClear");
+    if(mCorrect===TOTAL) awardBadge("maximPerfect");
+
+    /* Show reward first, then slot machine AFTER user closes reward */
+    showReward(
+      "MAXIM Complete!",
+      `Score: ${mCorrect}/${TOTAL} · ${avg.toFixed(2)}s/Q`,
+      "⚡",
+      () => {
+        showSlotMachine();
+      }
+    );
+
+    maximCompleted = true;
+    return;
+  }
+
+  let q = mQ[mIdx];
+  if (!q) {
+    q = genQ();
+    mQ[mIdx] = q;
+  }
+  status.textContent=`Question ${mIdx+1} / ${TOTAL}`;
+
+  const card=document.createElement("div");
+  card.className="question-card";
+  let html=`<div class="question-text">${q.txt}</div>`;
+  q.opts.forEach(v=>{
+    html+=`<div class="option" data-mode="maxim" data-v="${v}">${v}</div>`;
+  });
+  html+=`<div class="feedback"></div>`;
+  card.innerHTML=html;
+  box.appendChild(card);
+}
+
+function answerMaxim(chosen, optEl){
+  if (modeLock.maxim) return;
+  modeLock.maxim = true;
+
+  if(maximAnsweredCurrent) {
+    modeLock.maxim = false;
+    return;
+  }
+  maximAnsweredCurrent=true;
+
+  const q=mQ[mIdx];
+  const card=optEl.closest(".question-card");
+  const fb=card.querySelector(".feedback");
+  const opts=card.querySelectorAll(".option");
+  opts.forEach(o=>o.classList.add("disabled"));
+
+  mAnswered++;
+  updateMaximProgress();
+
+  if(chosen===q.correct){
+    mCorrect++;
+    optEl.classList.add("correct");
+    fb.textContent="Correct!";
+    onCorrectAnswer();
+  } else {
+    optEl.classList.add("incorrect");
+    fb.textContent=`Correct: ${q.correct}`;
+    opts.forEach(o=>{ if(+o.dataset.v===q.correct) o.classList.add("correct"); });
+    onWrongAnswer();
+  }
+
+  clearMT();
+  mTimer=setTimeout(()=>{
+    mIdx++;
+    renderMaximQuestion();
+  },1000);
+
+  setTimeout(()=>{ modeLock.maxim = false; }, 180);
+}
+
+/* =================== MEGA MODE (60s BLITZ) =================== */
+let megaActive=false;
+let megaTimeLeft=0;
+let megaTimer=null;
+let megaCorrect=0;
+let megaTotal=0;
+let megaQ=null;
+let megaTriggeredOnce=false;
+let lastModeBeforeMega="practice";
+let megaAnsweredCurrent=false;
+
+function updateMegaUI(){
+  const label=document.getElementById("megaTimerLabel");
+  label.textContent=`Time: ${megaTimeLeft}s`;
+  const pct=Math.max(0, Math.min(100, (megaTimeLeft/60)*100));
+  document.getElementById("megaTimeFill").style.width=`${pct}%`;
+  document.getElementById("megaResultBox").textContent=
+    `Answered: ${megaTotal} · Correct: ${megaCorrect}`;
+}
+
+function renderMegaQuestion(){
+  const box=document.getElementById("megaQuizContainer");
+  box.innerHTML="";
+  megaQ=genQ();
+  megaAnsweredCurrent=false;
+
+  const card=document.createElement("div");
+  card.className="question-card";
+  let html=`<div class="question-text">${megaQ.txt}</div>`;
+  megaQ.opts.forEach(v=>{
+    html+=`<div class="option" data-mode="mega" data-v="${v}">${v}</div>`;
+  });
+  html+=`<div class="feedback"></div>`;
+  card.innerHTML=html;
+  box.appendChild(card);
+}
+
+function startMegaMode(){
+  const now = Date.now();
+  if(megaActive) return;
+  if(now < megaCooldownUntil) return;
+
+  megaActive=true;
+  megaTriggeredOnce=true;
+  lastModeBeforeMega=currentMode;
+
+  megaRuns++;
+  if(megaRuns>=3) awardBadge("mega3");
+
+  document.getElementById("practiceSection").style.display="none";
+  document.getElementById("maximSection").style.display="none";
+  document.getElementById("megaSection").style.display="block";
+  currentMode="mega";
+
+  megaTimeLeft=60;
+  megaCorrect=0;
+  megaTotal=0;
+  updateMegaUI();
+  renderMegaQuestion();
+
+  if(megaTimer) clearInterval(megaTimer);
+  megaTimer=setInterval(()=>{
+    megaTimeLeft--;
+    updateMegaUI();
+    if(megaTimeLeft<=0){
+      endMegaMode();
+    }
+  },1000);
+  awardBadge("megaMode");
+  saveState();
+}
+
+function endMegaMode(){
+  if(megaTimer){
+    clearInterval(megaTimer);
+    megaTimer=null;
+  }
+  megaActive=false;
+
+  megaCooldownUntil = Date.now() + MEGA_COOLDOWN_MS;
+
+  let rank="No Rank";
+  let icon="⏱️";
+  const accuracy = megaTotal>0 ? megaCorrect/megaTotal : 0;
+  if(megaCorrect>=25){ rank="Gold"; icon="🥇"; }
+  else if(megaCorrect>=15){ rank="Silver"; icon="🥈"; }
+  else if(megaCorrect>=5){ rank="Bronze"; icon="🥉"; }
+
+  showReward(`MEGA MODE ${rank}!`,
+    `Correct: ${megaCorrect} / ${megaTotal} in 60s`,
+    icon
+  );
+
+  if (accuracy >= 0.7) {
+    triggerFocusRound(8, "You crushed MEGA MODE. 8 Focus questions next!");
+  } else {
+    triggerRelaxRound(8, "MEGA was intense. 8 Relax questions to cool down.");
+  }
+
+  if(lastModeBeforeMega==="maxim") startMaxim();
+  else startPractice();
+}
+
+function answerMega(chosen, optEl){
+  if (modeLock.mega) return;
+  modeLock.mega = true;
+
+  if(!megaActive || !megaQ) {
+    modeLock.mega = false;
+    return;
+  }
+  if(megaAnsweredCurrent) {
+    modeLock.mega = false;
+    return;
+  }
+  megaAnsweredCurrent=true;
+
+  const card=optEl.closest(".question-card");
+  const fb=card.querySelector(".feedback");
+  const opts=card.querySelectorAll(".option");
+  opts.forEach(o=>o.classList.add("disabled"));
+
+  megaTotal++;
+
+  if(chosen===megaQ.correct){
+    megaCorrect++;
+    optEl.classList.add("correct");
+    fb.textContent="Correct!";
+    onCorrectAnswer();
+  } else {
+    optEl.classList.add("incorrect");
+    fb.textContent=`Correct: ${megaQ.correct}`;
+    opts.forEach(o=>{ if(+o.dataset.v===megaQ.correct) o.classList.add("correct"); });
+    onWrongAnswer();
+  }
+  updateMegaUI();
+  renderMegaQuestion();
+
+  setTimeout(()=>{ modeLock.mega = false; }, 180);
+}
+
+/* Random unlock of MEGA MODE */
+function maybeUnlockMegaMode(){
+  if(megaActive) return;
+  if(megaTriggeredOnce) return;
+  const now = Date.now();
+  if(now < megaCooldownUntil) return;
+  const roll = Math.random();
+  if(roll < 0.08){
+    startMegaMode();
+  }
+}
+
+/* =================== SPAM PENALTY + COOLDOWN =================== */
+function applySpamPenalty(now) {
+  spamPenaltyUntil = now + SPAM_PENALTY_MS;
+  spamCount = 0;
+  streak = 0;
+  xp = Math.max(0, xp - 10);
+  saveState();
+  updatePlayerUI();
+
+  const banner = document.getElementById("spamCooldownBanner");
+  if (banner) banner.style.display = "flex";
+}
+
+/* =================== GLOBAL CLICK HANDLER =================== */
+document.addEventListener("click", e=>{
+  const opt = e.target.closest(".option");
+  if(!opt) return;
+
+  const now = Date.now();
+
+  if (now < spamPenaltyUntil) return;
+
+  if (now - spamWindowStart > SPAM_WINDOW_MS) {
+    spamWindowStart = now;
+    spamCount = 0;
+  }
+  spamCount++;
+
+  if (spamCount > SPAM_THRESHOLD) {
+    applySpamPenalty(now);
+    return;
+  }
+
+  if (now - lastClickTs < CLICK_COOLDOWN_MS) return;
+  lastClickTs = now;
+
+  const mode=opt.dataset.mode;
+  if(mode==="practice"){
+    const idx=parseInt(opt.dataset.index,10);
+    const chosen=+opt.dataset.v;
+    answerPractice(idx,chosen,opt);
+  } else if(mode==="maxim"){
+    const chosen=+opt.dataset.v;
+    answerMaxim(chosen,opt);
+  } else if(mode==="mega"){
+    const chosen=+opt.dataset.v;
+    answerMega(chosen,opt);
+  }
+});
+
+/* =================== MODE SWITCH BUTTONS =================== */
+document.querySelectorAll(".mode-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".mode-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const mode=btn.dataset.mode;
+    if(mode==="practice") startPractice();
+    else startMaxim();
+  });
+});
+
+document.getElementById("newPracticeSetBtn").addEventListener("click", startPractice);
+
+/* =================== INIT & SPLASH =================== */
+function initApp() {
+  renderBadgesUI();
+  updatePlayerUI();
+  updatePacingUI();
+  updateMaximStatsUI();
+  updateMaximDailyUI();
+  renderMaximMiniChart();
+  startPractice();
+}
+
+/* Spam cooldown banner updater */
+let spamCooldownSecondsEl = null;
+let spamBannerEl = null;
+
+setInterval(() => {
+  if (!spamCooldownSecondsEl || !spamBannerEl) {
+    spamCooldownSecondsEl = document.getElementById("spamCooldownSeconds");
+    spamBannerEl = document.getElementById("spamCooldownBanner");
+  }
+  if (!spamCooldownSecondsEl || !spamBannerEl) return;
+
+  const now = Date.now();
+  if (now < spamPenaltyUntil) {
+    const remaining = Math.ceil((spamPenaltyUntil - now)/1000);
+    spamCooldownSecondsEl.textContent = remaining;
+    spamBannerEl.style.display = "flex";
+  } else {
+    spamBannerEl.style.display = "none";
+  }
+}, 300);
+
+window.addEventListener("load", () => {
+  const icons = ["🧮","🧸","🎲","🔢","🚀","🧠"];
+  const randomIcon = icons[Math.floor(Math.random()*icons.length)];
+  const splashIconEl = document.querySelector(".splash-icon");
+  if (splashIconEl) splashIconEl.textContent = randomIcon;
+
+  initApp();
+
+  const splash = document.getElementById("splashScreen");
+  const app = document.querySelector(".app");
+  setTimeout(() => {
+    splash.style.opacity = "0";
+    splash.style.pointerEvents = "none";
+    app.classList.add("ready");
+    setTimeout(() => {
+      splash.style.display = "none";
+    }, 400);
+  }, 600);
+});
+</script>
+
+</body>
+</html>
